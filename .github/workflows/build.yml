@@ -1,12 +1,6 @@
-name: Node.js CI with Build Logs
+name: Node.js CI with Clean Logs
 
-on:
-  push:
-  pull_request:
-
-permissions:
-  contents: read
-  actions: write
+on: [push, pull_request]
 
 jobs:
   build:
@@ -25,26 +19,35 @@ jobs:
           node-version: "18"
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Install dependencies with clean log
         run: |
-          echo "$(date) - Installing dependencies..." >> shared_logs/build.log
-          npm install >> shared_logs/build.log 2>&1
+          {
+            echo "$(date) - Installing dependencies..."
+            npm install
+          } > shared_logs/build.log 2>&1
 
-      - name: Run lint
+      - name: Run lint with clean output
         run: |
-          echo "$(date) - Running lint..." >> shared_logs/build.log
-          npm run lint >> shared_logs/build.log 2>&1 || true
+          {
+            echo "$(date) - Running lint..."
+            npm run lint || true
+            echo "Lint completed (warnings allowed)"
+          } >> shared_logs/build.log 2>&1
 
-      - name: Run tests
+      - name: Run tests with clean output
         run: |
-          echo "$(date) - Running tests..." >> shared_logs/build.log
-          npm test >> shared_logs/build.log 2>&1
+          {
+            echo "$(date) - Running tests..."
+            npm test
+            echo "Tests completed successfully"
+          } >> shared_logs/build.log 2>&1
 
       - name: Upload build log
-        uses: actions/upload-artifact@v3.1.1
+        uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: shared_logs/build.log
+          retention-days: 5
 
-      - name: Show log contents (debug)
-        run: cat shared_logs/build.log
+      - name: Display success message
+        run: echo "Build completed successfully - check artifacts for full logs"
