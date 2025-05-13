@@ -1,6 +1,12 @@
 name: Node.js CI with Build Logs
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  actions: write
 
 jobs:
   build:
@@ -35,7 +41,7 @@ jobs:
           npm test >> shared_logs/build.log 2>&1
 
       - name: Upload build log
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: build-log
           path: shared_logs/build.log
